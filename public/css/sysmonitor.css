@@ -1,0 +1,110 @@
+/* SysMonitor Web — estilos compartidos por todos los módulos (M6).
+   Cada módulo puede agregar estilos propios con @push('estilos'). */
+
+:root {
+    --sm-bg: #f4f5f2;
+    --sm-surface: #ffffff;
+    --sm-ink: #1c2321;
+    --sm-muted: #5f6965;
+    --sm-line: #dfe3de;
+    --sm-side: #15201d;
+    --sm-side-ink: #c9d4cf;
+    --sm-accent: #1a7a5c;
+    --sm-accent-soft: #e2f3ec;
+    --sm-warn: #c7801a;
+    --sm-danger: #c2412d;
+    --sm-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+body {
+    background: var(--sm-bg);
+    color: var(--sm-ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 15px;
+}
+
+.sm-shell { display: flex; min-height: 100vh; }
+
+/* Barra lateral */
+.sm-sidebar {
+    width: 236px; flex-shrink: 0; background: var(--sm-side); color: var(--sm-side-ink);
+    display: flex; flex-direction: column; padding: 20px 14px; position: sticky; top: 0; height: 100vh;
+}
+.sm-brand { color: #fff; text-decoration: none; font-weight: 600; font-size: 18px; padding: 0 8px 22px; }
+.sm-brand-mark { color: #4fd1a5; }
+.sm-brand-sub { font-family: var(--sm-mono); font-weight: 400; font-size: 12px; color: #8a9893; margin-left: 4px; }
+.sm-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.sm-nav-link {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px;
+    color: var(--sm-side-ink); text-decoration: none;
+}
+.sm-nav-link small { margin-left: auto; font-family: var(--sm-mono); font-size: 11px; color: #8a9893; }
+.sm-nav-link:hover { background: #1f2d29; color: #fff; }
+.sm-nav-link.active { background: #24372f; color: #fff; box-shadow: inset 3px 0 0 #4fd1a5; }
+.sm-nav-sep { margin: 18px 10px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #8a9893; }
+.sm-sidebar-foot { border-top: 1px solid #25332f; padding: 14px 10px 0; }
+.sm-user { color: #fff; font-weight: 500; }
+.sm-user-mail { font-size: 12px; color: #8a9893; }
+
+/* Contenido */
+.sm-main { flex: 1; padding: 24px 32px 48px; min-width: 0; }
+.sm-topbar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+.sm-eyebrow { font-family: var(--sm-mono); font-size: 12px; color: var(--sm-muted); }
+.sm-title { font-size: 26px; font-weight: 600; margin: 0; }
+.sm-host { font-family: var(--sm-mono); font-size: 13px; color: var(--sm-muted); }
+.sm-rol { font-weight: 500; }
+.sm-rol-administrador { background: var(--sm-accent); }
+.sm-rol-observador { background: #6b7a75; }
+
+.sm-card { background: var(--sm-surface); border: 1px solid var(--sm-line); border-radius: 10px; padding: 18px 20px; }
+.sm-card h2 { font-size: 15px; font-weight: 600; margin: 0 0 12px; }
+.sm-kpi-label { font-size: 13px; color: var(--sm-muted); }
+.sm-kpi-value { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sm-mono, .table .sm-mono { font-family: var(--sm-mono); font-size: 13px; }
+
+/* Pantallas de módulos */
+.sm-fuente { font-family: var(--sm-mono); font-size: 12px; color: var(--sm-muted); }
+.sm-card-tabla { padding: 0; overflow: hidden; }
+.sm-card-tabla > .sm-card-head { padding: 14px 16px; border-bottom: 1px solid #eceee9; }
+.sm-card-tabla .table { margin: 0; font-size: 14px; }
+.sm-card-tabla .table thead th {
+    background: #f7f8f6; font-size: 12px; font-weight: 600; color: #3d4643;
+    text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
+}
+.sm-vacio { text-align: center; color: var(--sm-muted); padding: 28px 16px !important; }
+.sm-area-vacia {
+    border: 1px dashed var(--sm-line); border-radius: 8px; min-height: 160px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    color: var(--sm-muted); font-size: 14px; padding: 16px;
+}
+
+.sm-chip {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px;
+    background: var(--sm-surface); border: 1px solid var(--sm-line); border-radius: 8px; font-size: 13px;
+}
+.sm-estado {
+    display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; border-radius: 5px;
+    font-family: var(--sm-mono); font-size: 12px; color: #fff;
+}
+.sm-estado-R { background: #1a7a5c; }
+.sm-estado-S { background: #5f6965; }
+.sm-estado-D { background: #9a5a0a; }
+.sm-estado-Z { background: #b93a26; }
+.sm-estado-T { background: #6a4fa3; }
+
+.sm-num { font-family: var(--sm-mono); font-size: 14px; }
+.sm-matriz { display: grid; gap: 6px; align-items: center; }
+.sm-matriz input, .sm-matriz .sm-celda { height: 36px; text-align: center; font-family: var(--sm-mono); }
+.sm-celda { line-height: 34px; border: 1px solid #b7dccd; background: #eef7f2; border-radius: 6px; }
+.sm-leyenda { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+.btn-sm-accent { background: var(--sm-accent); color: #fff; }
+.btn-sm-accent:hover, .btn-sm-accent:focus { background: #125a43; color: #fff; }
+.btn-sm-dark { background: var(--sm-side); color: #fff; }
+.btn-sm-dark:hover, .btn-sm-dark:focus { background: #000; color: #fff; }
+.btn-check:checked + .btn-outline-secondary { background: var(--sm-accent-soft); color: #125a43; border-color: var(--sm-accent); }
+
+@media (max-width: 900px) {
+    .sm-shell { flex-direction: column; }
+    .sm-sidebar { width: 100%; height: auto; position: static; }
+    .sm-main { padding: 20px 16px; }
+}
