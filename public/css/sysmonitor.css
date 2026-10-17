@@ -103,6 +103,12 @@ body {
 .btn-sm-dark:hover, .btn-sm-dark:focus { background: #000; color: #fff; }
 .btn-check:checked + .btn-outline-secondary { background: var(--sm-accent-soft); color: #125a43; border-color: var(--sm-accent); }
 
+/* Avisos temporales de las acciones (SM.aviso en js/sysmonitor-comun.js) */
+.sm-aviso {
+    position: fixed; top: 16px; right: 16px; z-index: 2000; max-width: min(420px, calc(100vw - 32px));
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .12); font-size: 14px;
+}
+
 @media (max-width: 900px) {
     .sm-shell { flex-direction: column; }
     .sm-sidebar { width: 100%; height: auto; position: static; }

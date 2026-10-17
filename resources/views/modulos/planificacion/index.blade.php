@@ -4,13 +4,24 @@
 @section('modulo', 'M3 · simulación')
 
 @section('contenido')
-@php
-    $algoritmos = ['FCFS' => 'FCFS', 'SJF' => 'SJF', 'SRTF' => 'SRTF', 'RR' => 'Round Robin', 'PRIORIDAD' => 'Prioridades'];
-@endphp
+@php $esAdmin = auth()->user()->esAdministrador(); @endphp
+
+<div id="m3"
+     data-url-simular="{{ route('planificacion.simular') }}"
+     data-url-guardar="{{ $esAdmin ? route('planificacion.guardar') : '' }}"
+     data-url-lista="{{ route('planificacion.lista') }}"
+     data-url-base="{{ url('planificacion/simulaciones') }}"
+     data-algoritmos='@json($algoritmos)'>
 
 <div class="d-flex justify-content-end gap-2 mb-3">
-    <button type="button" class="btn btn-outline-secondary"><i class="bi bi-clock-history"></i> Simulaciones guardadas</button>
-    <button type="button" class="btn btn-sm-accent" disabled><i class="bi bi-save"></i> Guardar simulación</button>
+    <button type="button" class="btn btn-outline-secondary" id="ver-guardadas"><i class="bi bi-clock-history"></i> Simulaciones guardadas</button>
+    @if ($esAdmin)
+        <button type="button" class="btn btn-sm-accent" id="guardar" disabled><i class="bi bi-save"></i> Guardar simulación</button>
+    @else
+        <span class="d-inline-block" tabindex="0" title="Solo el rol Administrador puede guardar">
+            <button type="button" class="btn btn-sm-accent" disabled><i class="bi bi-save"></i> Guardar simulación</button>
+        </span>
+    @endif
 </div>
 
 <div class="row g-3 mb-3">
@@ -19,8 +30,9 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Procesos</h2>
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus-lg"></i> Agregar</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-shuffle"></i> Generar aleatorio</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="agregar"><i class="bi bi-plus-lg"></i> Agregar</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="aleatorio"><i class="bi bi-shuffle"></i> Generar aleatorio</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="ejemplo" title="P1–P5 del caso de prueba del grupo">Ejemplo</button>
             </div>
         </div>
         <table class="table align-middle mb-2">
@@ -29,19 +41,9 @@
                     <th style="width: 90px">Proceso</th><th>Llegada</th><th>Ráfaga CPU</th><th>Prioridad</th><th style="width: 50px"></th>
                 </tr>
             </thead>
-            <tbody id="filas-procesos">
-                @for ($i = 1; $i <= 3; $i++)
-                    <tr>
-                        <td class="sm-num fw-semibold">P{{ $i }}</td>
-                        <td><input type="number" min="0" class="form-control sm-mono" aria-label="Llegada P{{ $i }}"></td>
-                        <td><input type="number" min="1" class="form-control sm-mono" aria-label="Ráfaga P{{ $i }}"></td>
-                        <td><input type="number" min="0" class="form-control sm-mono" aria-label="Prioridad P{{ $i }}"></td>
-                        <td><button type="button" class="btn btn-sm btn-outline-secondary" aria-label="Quitar P{{ $i }}"><i class="bi bi-x-lg"></i></button></td>
-                    </tr>
-                @endfor
-            </tbody>
+            <tbody id="filas-procesos"></tbody>
         </table>
-        <small class="text-secondary">Prioridad: número menor = mayor prioridad.</small>
+        <small class="text-secondary">Prioridad: número menor = mayor prioridad. Máximo 15 procesos; valores enteros de 0 a 100.</small>
     </div></div>
 
     {{-- Algoritmo --}}
@@ -57,16 +59,20 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             <label for="quantum" class="fw-semibold" style="font-size: 14px">Quantum</label>
-            <input id="quantum" type="number" min="1" value="2" class="form-control sm-mono" style="width: 90px">
+            <input id="quantum" type="number" min="1" max="20" value="2" class="form-control sm-mono" style="width: 90px">
             <small class="text-secondary">solo Round Robin</small>
         </div>
-        <button type="button" class="btn btn-sm-dark btn-lg mt-auto">Simular</button>
+        <div class="text-secondary" style="font-size: 12px" id="descripcion-algoritmo"></div>
+        <button type="button" class="btn btn-sm-dark btn-lg mt-auto" id="simular">Simular</button>
     </div></div>
 </div>
 
 {{-- Diagrama de Gantt --}}
 <div class="sm-card mb-3">
-    <h2>Diagrama de Gantt</h2>
+    <div class="d-flex justify-content-between align-items-baseline">
+        <h2>Diagrama de Gantt</h2>
+        <span class="sm-fuente" id="titulo-gantt"></span>
+    </div>
     <div id="gantt" class="sm-area-vacia" style="min-height: 90px">Ingrese los procesos y presione “Simular” para ver el diagrama.</div>
 </div>
 
@@ -96,11 +102,47 @@
                 <thead><tr><th>Algoritmo</th><th class="text-end">Espera promedio</th><th class="text-end">Retorno promedio</th></tr></thead>
                 <tbody id="comparativa">
                     @foreach ($algoritmos as $valor => $nombre)
-                        <tr><td>{{ $nombre }}</td><td class="text-end sm-num">—</td><td class="text-end sm-num">—</td></tr>
+                        <tr data-alg="{{ $valor }}"><td>{{ $nombre }}</td><td class="text-end sm-num">—</td><td class="text-end sm-num">—</td></tr>
                     @endforeach
                 </tbody>
             </table>
+            <div class="px-3 pb-3"><div style="height: 180px"><canvas id="grafica-comparativa"></canvas></div></div>
         </div>
     </div>
 </div>
+
+{{-- Simulaciones guardadas --}}
+<div class="modal fade" id="modal-guardadas" tabindex="-1" aria-labelledby="titulo-guardadas" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titulo-guardadas">Simulaciones guardadas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead><tr><th>#</th><th>Nombre</th><th>Algoritmo</th><th>Proc.</th><th class="text-end">Espera</th><th class="text-end">Retorno</th><th>Usuario</th><th>Fecha</th></tr></thead>
+                    <tbody id="lista-guardadas"><tr><td colspan="8" class="sm-vacio">Cargando…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 @endsection
+
+@push('estilos')
+<style>
+    .sm-gantt { width: 100%; }
+    .sm-gantt-barra { display: flex; height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid #cfd5cf; }
+    .sm-gantt-tramo { display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--sm-mono); font-size: 13px; font-weight: 500; border-right: 1px solid rgba(255,255,255,.6); min-width: 0; overflow: hidden; }
+    .sm-gantt-tramo.ocioso { background: repeating-linear-gradient(45deg, #eef0ed, #eef0ed 6px, #e2e5e1 6px, #e2e5e1 12px); color: #5f6965; }
+    .sm-gantt-eje { position: relative; height: 22px; font-family: var(--sm-mono); font-size: 11px; color: #5f6965; }
+    .sm-gantt-eje span { position: absolute; transform: translateX(-50%); top: 3px; }
+    #lista-guardadas tr { cursor: pointer; }
+</style>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/m3-planificacion.js') }}?v=1"></script>
+@endpush

@@ -4,8 +4,11 @@
 @section('modulo', 'M2 · /proc/cpuinfo · /proc/stat · /proc/meminfo · /proc/loadavg')
 
 @section('contenido')
+<div id="m2" data-url="{{ route('api.cpu-memoria') }}" data-nucleos="{{ $cpu['logicos'] }}">
+
 {{-- Controles de actualización --}}
 <div class="d-flex justify-content-end align-items-center gap-2 mb-3" style="font-size: 14px">
+    <span class="sm-fuente me-auto" id="ultima-lectura">Leyendo /proc…</span>
     <label for="intervalo" class="text-secondary">Actualizar cada</label>
     <select id="intervalo" class="form-select form-select-sm" style="width: auto">
         <option value="2000">2 s</option>
@@ -19,17 +22,17 @@
 <div class="row g-3 mb-3">
     <div class="col-lg-6 col-xl-4"><div class="sm-card h-100">
         <div class="sm-kpi-label">Modelo de CPU</div>
-        <div class="fw-semibold fs-6" id="cpu-modelo">—</div>
-        <div class="sm-fuente" id="cpu-nucleos">— núcleos · /proc/cpuinfo</div>
+        <div class="fw-semibold fs-6" id="cpu-modelo">{{ $cpu['modelo'] }}</div>
+        <div class="sm-fuente" id="cpu-nucleos">{{ $cpu['logicos'] }} núcleos lógicos · {{ $cpu['fisicos'] }} físicos · /proc/cpuinfo</div>
     </div></div>
     <div class="col-6 col-lg-3 col-xl-2"><div class="sm-card h-100">
         <div class="sm-kpi-label">Uso de CPU</div>
         <div class="sm-kpi-value" id="cpu-uso">—</div>
-        <div class="sm-fuente">/proc/stat</div>
+        <div class="sm-fuente">/proc/stat (2 lecturas)</div>
     </div></div>
     <div class="col-6 col-lg-3 col-xl-3"><div class="sm-card h-100">
         <div class="sm-kpi-label">Carga 1 / 5 / 15 min</div>
-        <div class="sm-kpi-value sm-mono" style="font-size: 24px" id="carga">—</div>
+        <div class="sm-kpi-value sm-mono" style="font-size: 20px; white-space: nowrap" id="carga">—</div>
         <div class="sm-fuente">/proc/loadavg</div>
     </div></div>
     <div class="col-lg-6 col-xl-3"><div class="sm-card h-100">
@@ -63,6 +66,7 @@
                 <div class="col-4"><span class="sm-leyenda" style="background: #9fcfbd"></span>Caché<div class="sm-num" id="ram-cache-mb">—</div></div>
                 <div class="col-4"><span class="sm-leyenda" style="background: #e8ebe7; border: 1px solid #c9cfc9"></span>Libre<div class="sm-num" id="ram-libre-mb">—</div></div>
             </div>
+            <div class="sm-fuente mt-1">Disponible para programas: <span id="ram-disponible">—</span> (MemAvailable)</div>
         </div>
         <div>
             <div class="d-flex justify-content-between" style="font-size: 14px">
@@ -73,6 +77,7 @@
                 <div class="progress-bar" id="swap-usada" style="width: 0%; background: #6a4fa3"></div>
             </div>
         </div>
+        <div style="height: 110px"><canvas id="grafica-mem"></canvas></div>
     </div></div>
 </div>
 
@@ -83,36 +88,19 @@
             <div class="sm-card sm-card-tabla">
                 <div class="sm-card-head"><h2 class="mb-0">{{ $titulo }}</h2></div>
                 <table class="table align-middle">
-                    <thead><tr><th>PID</th><th>Comando</th><th class="text-end">{{ $clave === 'cpu' ? '% CPU' : 'Memoria' }}</th></tr></thead>
+                    <thead><tr><th>PID</th><th>Comando</th><th>Usuario</th><th class="text-end">{{ $clave === 'cpu' ? '% CPU' : 'Memoria' }}</th></tr></thead>
                     <tbody id="top-{{ $clave }}">
-                        <tr><td colspan="3" class="sm-vacio">No hay datos para mostrar.</td></tr>
+                        <tr><td colspan="4" class="sm-vacio">Cargando…</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     @endforeach
 </div>
+<p class="sm-fuente mt-2">% CPU de cada proceso = Δ(utime + stime) de /proc/[pid]/stat entre dos lecturas; 100 % equivale a un núcleo completo (igual que top).</p>
+</div>
 @endsection
 
 @push('scripts')
-<script>
-    // Gráfica vacía; el módulo M2 le agrega los datos con fetch cada 2–5 s.
-    window.graficaCpu = new Chart(document.getElementById('grafica-cpu'), {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                { label: 'Total', data: [], borderColor: '#1a7a5c', borderWidth: 2.5, pointRadius: 0, tension: 0.3 },
-                { label: 'cpu0', data: [], borderColor: '#2f6fa8', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-                { label: 'cpu1', data: [], borderColor: '#c7801a', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-            ],
-        },
-        options: {
-            maintainAspectRatio: false,
-            animation: false,
-            scales: { y: { min: 0, max: 100, ticks: { callback: (v) => v + ' %' } } },
-            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 14, boxHeight: 2 } } },
-        },
-    });
-</script>
+<script src="{{ asset('js/m2-cpu-memoria.js') }}?v=1"></script>
 @endpush
