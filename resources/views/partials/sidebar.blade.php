@@ -27,6 +27,9 @@
             <a href="{{ route('bitacora.index') }}" class="sm-nav-link {{ request()->routeIs('bitacora.*') ? 'active' : '' }}">
                 <i class="bi bi-journal-text"></i><span>Bitácora</span><small>M6</small>
             </a>
+            <a href="{{ route('usuarios.index') }}" class="sm-nav-link {{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i><span>Usuarios</span><small>M6</small>
+            </a>
         @endif
     </nav>
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InterbloqueosController;
 use App\Http\Controllers\PlanificacionController;
 use App\Http\Controllers\ProcesosController;
+use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,4 +63,10 @@ Route::middleware('auth')->group(function () {
 
     // M6 — Bitácora (solo Administrador)
     Route::get('/bitacora', [BitacoraController::class, 'index'])->middleware('admin')->name('bitacora.index');
+
+    // M6 — Cuentas de la aplicación (solo Administrador; crea únicamente Observadores)
+    Route::middleware('admin')->group(function () {
+        Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios.index');
+        Route::post('/usuarios', [UsuariosController::class, 'store'])->middleware('throttle:10,1')->name('usuarios.store');
+    });
 });
